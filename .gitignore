@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# SceneProof runtime data
+.data/
+artifacts/
+reports/
+*.tmp
+
+# Test media output
+tests/.tmp/
+
+# Editors and operating systems
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+

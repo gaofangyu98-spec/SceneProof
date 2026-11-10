@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sceneproof"
+version = "0.1.0"
+description = "Evidence-based quality verification and regression tooling for AI video production."
+readme = "README.md"
+requires-python = ">=3.12,<3.16"
+dependencies = []
+
+[project.scripts]
+sceneproof = "sceneproof.cli:main"
+
+[dependency-groups]
+dev = [
+  "mypy>=1.16",
+  "pytest>=8.4",
+  "pytest-cov>=6.2",
+  "ruff>=0.12",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["sceneproof"]
+
+[tool.coverage.report]
+fail_under = 60
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["B", "E", "F", "I", "PTH", "RUF", "SIM", "UP"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+files = ["src"]
+mypy_path = "src"
+python_version = "3.12"
+strict = true
+warn_unreachable = true
+
