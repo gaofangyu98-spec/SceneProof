@@ -10,7 +10,12 @@ SceneProof 是面向 AI 视频生产链路的场景级质量验证与回归工�
 - 比较不同平台版本或模型版本之间的回归差异
 - 输出可以回溯到原始文件和日志的测试报告
 
-当前里程碑是最小可用骨架：CLI 可以通过 `ffprobe` 读取真实视频信息。
+当前里程碑是“可复现运行记录”：
+
+- 通过 JSON 清单描述一次视频生成任务
+- 使用 Mock 提供器生成本地测试视频
+- 保存输入快照、提供器信息、运行状态、耗时和产物哈希
+- 通过 `ffprobe` 读取真实视频信息
 
 ## 环境要求
 
@@ -40,6 +45,33 @@ uv run sceneproof probe "C:\path\to\video.mp4"
 ```powershell
 uv run sceneproof probe "C:\path\to\video.mp4" --json
 ```
+
+执行示例生成任务：
+
+```powershell
+uv run sceneproof run fixtures/cases/three_scene_demo.json --output-dir .data/runs
+```
+
+输出 JSON 运行记录：
+
+```powershell
+uv run sceneproof run fixtures/cases/three_scene_demo.json --output-dir .data/runs --json
+```
+
+每次运行会生成独立目录：
+
+```text
+.data/runs/
+  three-scene-demo/
+    <run-id>/
+      manifest.json
+      run.json
+      artifacts/
+        final.mp4
+        scene-plan.json
+```
+
+`manifest.json` 是执行时的输入快照，`run.json` 包含状态、耗时、提供器信息和产物哈希，`artifacts/` 保存本次生成产物。
 
 ## 开发检查
 

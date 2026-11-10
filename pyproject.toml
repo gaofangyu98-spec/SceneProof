@@ -4,11 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sceneproof"
-version = "0.1.0"
+version = "0.2.0"
 description = "Evidence-based quality verification and regression tooling for AI video production."
 readme = "README.md"
 requires-python = ">=3.12,<3.16"
-dependencies = []
+dependencies = [
+    "pydantic>=2.11,<3",
+]
 
 [project.scripts]
 sceneproof = "sceneproof.cli:main"
@@ -44,6 +46,7 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["B", "E", "F", "I", "PTH", "RUF", "SIM", "UP"]
+ignore = ["RUF001", "RUF002", "RUF003"]
 
 [tool.ruff.format]
 quote-style = "double"

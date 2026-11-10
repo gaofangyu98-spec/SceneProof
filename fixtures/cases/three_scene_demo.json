@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "case_id": "three-scene-demo",
+  "title": "三场景短视频演示",
+  "script": "人物走进咖啡馆，在窗边坐下，然后拿起一杯咖啡。",
+  "scene_count": 3,
+  "aspect_ratio": "9:16",
+  "duration_seconds": 2,
+  "language": "zh-CN",
+  "provider": {
+    "name": "mock",
+    "version": "0.2.0",
+    "model": "mock-video",
+    "model_version": "1",
+    "seed": 42
+  }
+}

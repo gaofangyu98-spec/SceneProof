@@ -2,23 +2,24 @@
 
 ## Milestone 0: Foundation
 
-- Repository, packaging, linting, typing, tests, and CI
-- Real FFprobe integration
-- CLI JSON and human-readable output
+- [x] Repository, packaging, linting, typing, tests, and CI
+- [x] Real FFprobe integration
+- [x] CLI JSON and human-readable output
 
 ## Milestone 1: Reproducible run ledger
 
-- Generation case manifest
-- Run and artifact records
-- Mock provider
-- Local artifact storage
+- [x] Generation case manifest
+- [x] Run and artifact records
+- [x] Mock provider
+- [x] Local artifact storage
+- [ ] Add validator integration to the run pipeline
 
 ## Milestone 2: Deterministic verification
 
-- Container and stream checks
-- Missing audio and invalid duration checks
-- Black-frame, freeze, and silence detection
-- Structured evidence and failure categories
+- [ ] Container and stream checks
+- [ ] Missing audio and invalid duration checks
+- [ ] Black-frame, freeze, and silence detection
+- [ ] Structured evidence and failure categories
 
 ## Milestone 3: Quality evaluation
 
