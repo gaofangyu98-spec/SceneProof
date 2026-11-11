@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sceneproof"
 version = "0.2.0"
-description = "Evidence-based quality verification and regression tooling for AI video production."
+description = "面向 AI 视频生产链路的证据化质量验证与回归工具。"
 readme = "README.md"
 requires-python = ">=3.12,<3.16"
 dependencies = [

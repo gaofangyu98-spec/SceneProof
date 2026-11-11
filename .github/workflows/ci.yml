@@ -1,4 +1,4 @@
-name: CI
+name: 持续集成
 
 on:
   push:
@@ -11,36 +11,36 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: 检出代码
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: 配置 Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.14"
 
-      - name: Set up uv
+      - name: 配置 uv
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
 
-      - name: Install FFmpeg
+      - name: 安装 FFmpeg
         run: |
           sudo apt-get update
           sudo apt-get install --yes ffmpeg
 
-      - name: Install dependencies
+      - name: 安装依赖
         run: uv sync --locked
 
-      - name: Check formatting
+      - name: 检查代码格式
         run: uv run ruff format --check .
 
-      - name: Lint
+      - name: 运行静态检查
         run: uv run ruff check .
 
-      - name: Type check
+      - name: 运行类型检查
         run: uv run mypy src
 
-      - name: Test
+      - name: 运行测试
         run: uv run pytest --cov=sceneproof --cov-report=term-missing
 
