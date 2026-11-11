@@ -15,9 +15,11 @@ from sceneproof.providers.base import ProviderError
 class MockVideoProvider:
     """使用 FFmpeg 生成一个轻量视频，用于打通测试链路。"""
 
+    # 作用：初始化 Mock 提供器；处理：保存本次生成使用的 FFmpeg 可执行文件名。
     def __init__(self, *, ffmpeg_executable: str = "ffmpeg") -> None:
         self._ffmpeg_executable = ffmpeg_executable
 
+    # 作用：生成本地测试视频；处理：创建 MP4 和场景计划并返回提供器记录。
     def generate(
         self,
         manifest: GenerationManifest,
@@ -93,6 +95,7 @@ class MockVideoProvider:
         )
 
 
+# 作用：计算视频尺寸；处理：根据画幅比例生成最长边为 320 的偶数分辨率。
 def _resolve_dimensions(aspect_ratio: str) -> tuple[int, int]:
     width_ratio, height_ratio = (int(value) for value in aspect_ratio.split(":", maxsplit=1))
     if width_ratio >= height_ratio:
@@ -104,10 +107,12 @@ def _resolve_dimensions(aspect_ratio: str) -> tuple[int, int]:
     return _make_even(width), _make_even(height)
 
 
+# 作用：修正视频边长；处理：向下取最近的偶数，并保证最小值为 2。
 def _make_even(value: int) -> int:
     return max(2, value // 2 * 2)
 
 
+# 作用：构建场景计划；处理：按场景数量平均分配总时长并输出起止时间。
 def _build_scene_plan(manifest: GenerationManifest) -> dict[str, object]:
     scene_duration = manifest.duration_seconds / manifest.scene_count
     scenes = [

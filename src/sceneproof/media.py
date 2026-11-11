@@ -51,6 +51,7 @@ class MediaInfo:
     audio_streams: tuple[AudioStream, ...]
 
 
+# 作用：读取媒体信息；处理：校验路径、调用 FFprobe、解析 JSON 并返回媒体对象。
 def probe_media(path: str | Path, *, ffprobe_executable: str = "ffprobe") -> MediaInfo:
     """使用 FFprobe 读取媒体元数据。
 
@@ -101,6 +102,7 @@ def probe_media(path: str | Path, *, ffprobe_executable: str = "ffprobe") -> Med
     return build_media_info(payload, resolved_path)
 
 
+# 作用：解析 FFprobe 数据；处理：提取容器字段，并分别构建视频流和音频流。
 def build_media_info(payload: object, path: Path) -> MediaInfo:
     """从 FFprobe JSON 数据构建领域元数据。"""
 
@@ -160,12 +162,14 @@ def build_media_info(payload: object, path: Path) -> MediaInfo:
     )
 
 
+# 作用：安全转换字符串；处理：空值返回 None，其余值转换为字符串。
 def _optional_str(value: object) -> str | None:
     if value is None or value == "":
         return None
     return str(value)
 
 
+# 作用：安全转换整数；处理：空值或非法值返回 None，合法值转换为 int。
 def _optional_int(value: object) -> int | None:
     if value is None or value == "":
         return None
@@ -175,6 +179,7 @@ def _optional_int(value: object) -> int | None:
         return None
 
 
+# 作用：安全转换浮点数；处理：空值或非法值返回 None，合法值转换为 float。
 def _optional_float(value: object) -> float | None:
     if value is None or value == "":
         return None
@@ -184,6 +189,7 @@ def _optional_float(value: object) -> float | None:
         return None
 
 
+# 作用：解析帧率；处理：把分数形式帧率转换为浮点数，零或非法值返回 None。
 def _parse_frame_rate(value: object) -> float | None:
     if value is None or value == "":
         return None

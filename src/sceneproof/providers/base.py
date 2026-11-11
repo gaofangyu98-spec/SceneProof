@@ -15,6 +15,7 @@ class ProviderError(RuntimeError):
 class VideoProvider(Protocol):
     """平台适配器需要实现的最小接口。"""
 
+    # 作用：执行一次平台生成；处理：接收清单和产物目录，返回实际提供器信息。
     def generate(
         self,
         manifest: GenerationManifest,

@@ -17,16 +17,22 @@ from sceneproof.providers import create_provider
 from sceneproof.providers.base import ProviderError
 
 
+# 作用：构建命令行解析规则；处理：注册主命令、子命令和参数并返回解析器。
 def build_parser() -> argparse.ArgumentParser:
-    """构建命令行参数解析器。"""
+    """创建主解析器并注册版本、probe 和 run 参数。
 
+    返回的是命令行解析规则对象，不是命令执行后的参数结果。
+    """
     parser = argparse.ArgumentParser(
         prog="sceneproof",
         description="面向 AI 视频生产链路的证据化质量验证工具。",
     )
+
+    # --version 是特殊动作，输出版本后直接结束，不继续执行子命令。
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
 
     subparsers = parser.add_subparsers(dest="command", required=True)
+
     probe_parser = subparsers.add_parser("probe", help="检查本地媒体文件。")
     probe_parser.add_argument("path", type=Path, help="媒体文件路径。")
     probe_parser.add_argument("--json", action="store_true", dest="as_json", help="输出 JSON。")
@@ -45,6 +51,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+# 作用：运行命令行程序；处理：解析命令，分发到 probe 或 run，并返回退出码。
 def main(argv: Sequence[str] | None = None) -> int:
     """运行 SceneProof 命令行程序。"""
 
@@ -71,6 +78,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.error(f"不支持的命令：{args.command}")
 
 
+# 作用：执行生成任务命令；处理：加载清单、选择提供器、运行并输出结果。
 def _run_command(args: argparse.Namespace) -> int:
     try:
         manifest = load_manifest(args.manifest)
@@ -96,6 +104,7 @@ def _run_command(args: argparse.Namespace) -> int:
     return 0
 
 
+# 作用：统一终端编码；处理：在旧版 Windows 编码环境下将标准输出切换为 UTF-8。
 def _configure_text_streams() -> None:
     """在旧版 Windows 编码环境下将标准输出切换为 UTF-8。"""
 
@@ -108,12 +117,14 @@ def _configure_text_streams() -> None:
             reconfigure(encoding="utf-8")
 
 
+# 作用：转换媒体信息；处理：把数据对象转成可序列化字典，并将路径转成字符串。
 def _media_info_payload(media_info: MediaInfo) -> dict[str, object]:
     payload = asdict(media_info)
     payload["path"] = str(media_info.path)
     return payload
 
 
+# 作用：打印媒体摘要；处理：输出格式、时长、大小以及视频流和音频流详情。
 def _print_media_summary(media_info: MediaInfo) -> None:
     print(f"文件：{media_info.path}")
     print(f"格式：{media_info.format_name or '未知'}")
@@ -138,6 +149,7 @@ def _print_media_summary(media_info: MediaInfo) -> None:
         )
 
 
+# 作用：打印运行摘要；处理：输出运行编号、状态、目录和全部产物信息。
 def _print_run_summary(outcome: RunOutcome) -> None:
     record = outcome.record
     directory = outcome.directory
@@ -151,24 +163,28 @@ def _print_run_summary(outcome: RunOutcome) -> None:
         print(f"  - {artifact.path} ({artifact.size_bytes} 字节)")
 
 
+# 作用：格式化分辨率；处理：合法宽高转换为“宽x高”，缺失值返回“未知”。
 def _format_dimensions(width: int | None, height: int | None) -> str:
     if width is None or height is None:
         return "未知"
     return f"{width}x{height}"
 
 
+# 作用：格式化时长；处理：保留三位小数并附加“秒”，缺失值返回“未知”。
 def _format_seconds(value: float | None) -> str:
     if value is None:
         return "未知"
     return f"{value:.3f} 秒"
 
 
+# 作用：格式化文件大小；处理：输出字节数，缺失值返回“未知”。
 def _format_bytes(value: int | None) -> str:
     if value is None:
         return "未知"
     return f"{value} 字节"
 
 
+# 作用：格式化普通数字；处理：最多保留三位小数并去掉无意义的末尾零。
 def _format_number(value: float | None) -> str:
     if value is None:
         return "未知"

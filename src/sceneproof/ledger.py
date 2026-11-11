@@ -41,6 +41,7 @@ class RunOutcome:
     directory: Path
 
 
+# 作用：加载生成清单；处理：读取 JSON 文件并通过数据模型校验字段和取值。
 def load_manifest(path: str | Path) -> GenerationManifest:
     """从 JSON 文件读取并校验生成清单。"""
 
@@ -56,6 +57,7 @@ def load_manifest(path: str | Path) -> GenerationManifest:
         raise ManifestError(f"清单校验失败：{exc}") from exc
 
 
+# 作用：执行一次生成任务；处理：创建运行目录、调用提供器并保存完整证据。
 def execute_run(
     manifest: GenerationManifest,
     output_root: str | Path,
@@ -120,6 +122,7 @@ def execute_run(
     return RunOutcome(record=record, directory=run_dir)
 
 
+# 作用：收集生成产物；处理：扫描实际文件并计算路径、类型、大小和哈希。
 def _collect_artifacts(artifact_dir: Path) -> tuple[ArtifactRecord, ...]:
     records: list[ArtifactRecord] = []
     for path in sorted(artifact_dir.rglob("*")):
@@ -139,6 +142,7 @@ def _collect_artifacts(artifact_dir: Path) -> tuple[ArtifactRecord, ...]:
     return tuple(records)
 
 
+# 作用：计算文件哈希；处理：分块读取文件并返回十六进制 SHA-256。
 def _sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -147,6 +151,7 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+# 作用：原子写入 JSON；处理：先写临时文件，再替换目标文件以避免半成品。
 def _write_json_atomic(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary_path = path.with_name(f".{path.name}.tmp")
@@ -158,6 +163,7 @@ def _write_json_atomic(path: Path, payload: object) -> None:
     temporary_path.replace(path)
 
 
+# 作用：提取提供器信息；处理：把清单中的名称、版本、模型和模型版本转成记录。
 def _provider_record_from_manifest(manifest: GenerationManifest) -> ProviderRecord:
     return ProviderRecord(
         name=manifest.provider.name,
@@ -167,15 +173,18 @@ def _provider_record_from_manifest(manifest: GenerationManifest) -> ProviderReco
     )
 
 
+# 作用：生成运行编号；处理：组合 UTC 时间戳和短随机串，保证目录名称基本唯一。
 def _new_run_id(started_at: datetime) -> str:
     timestamp = started_at.strftime("%Y%m%dT%H%M%SZ")
     return f"{timestamp}-{secrets.token_hex(3)}"
 
 
+# 作用：获取当前时间；处理：返回包含 UTC 时区的当前时间对象。
 def _utc_now() -> datetime:
     return datetime.now(UTC)
 
 
+# 作用：校正时间时区；处理：拒绝无时区时间，并将其他时区统一转换为 UTC。
 def _ensure_utc(value: datetime) -> datetime:
     if value.tzinfo is None:
         raise RunLedgerError("运行时间必须包含时区")
