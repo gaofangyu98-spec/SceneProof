@@ -1,4 +1,4 @@
-"""Command-line interface for SceneProof."""
+"""SceneProof 命令行入口。"""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from sceneproof.providers.base import ProviderError
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Build the CLI parser."""
+    """构建命令行参数解析器。"""
 
     parser = argparse.ArgumentParser(
         prog="sceneproof",
@@ -46,7 +46,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    """Run the SceneProof CLI."""
+    """运行 SceneProof 命令行程序。"""
 
     _configure_text_streams()
     parser = build_parser()
@@ -97,7 +97,7 @@ def _run_command(args: argparse.Namespace) -> int:
 
 
 def _configure_text_streams() -> None:
-    """Use UTF-8 for CLI output on Windows locales that default to a legacy code page."""
+    """在旧版 Windows 编码环境下将标准输出切换为 UTF-8。"""
 
     for stream in (sys.stdout, sys.stderr):
         encoding = getattr(stream, "encoding", None)

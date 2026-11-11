@@ -1,4 +1,4 @@
-"""FFprobe integration and media metadata models."""
+"""FFprobe 调用与媒体元数据模型。"""
 
 from __future__ import annotations
 
@@ -10,16 +10,16 @@ from pathlib import Path
 
 
 class MediaProbeError(RuntimeError):
-    """Raised when media metadata cannot be obtained or parsed."""
+    """无法获取或解析媒体元数据时抛出。"""
 
 
 class ExecutableNotFoundError(MediaProbeError):
-    """Raised when the requested executable is unavailable."""
+    """请求的可执行文件不存在时抛出。"""
 
 
 @dataclass(frozen=True, slots=True)
 class VideoStream:
-    """Selected metadata for one video stream."""
+    """单个视频流的精简元数据。"""
 
     index: int
     codec_name: str | None
@@ -30,7 +30,7 @@ class VideoStream:
 
 @dataclass(frozen=True, slots=True)
 class AudioStream:
-    """Selected metadata for one audio stream."""
+    """单个音频流的精简元数据。"""
 
     index: int
     codec_name: str | None
@@ -40,7 +40,7 @@ class AudioStream:
 
 @dataclass(frozen=True, slots=True)
 class MediaInfo:
-    """Stable media metadata returned by the SceneProof boundary."""
+    """SceneProof 边界返回的稳定媒体元数据。"""
 
     path: Path
     format_name: str | None
@@ -52,20 +52,19 @@ class MediaInfo:
 
 
 def probe_media(path: str | Path, *, ffprobe_executable: str = "ffprobe") -> MediaInfo:
-    """Read media metadata using FFprobe.
+    """使用 FFprobe 读取媒体元数据。
 
-    The command is executed without a shell so paths and future user-provided values are passed
-    as individual process arguments.
+    调用命令时不经过 shell，路径和后续的用户输入都会作为独立参数传入。
     """
 
     media_path = Path(path).expanduser()
     try:
         resolved_path = media_path.resolve(strict=True)
     except FileNotFoundError as exc:
-        raise MediaProbeError(f"Media file does not exist: {media_path}") from exc
+        raise MediaProbeError(f"媒体文件不存在：{media_path}") from exc
 
     if not resolved_path.is_file():
-        raise MediaProbeError(f"Media path is not a regular file: {resolved_path}")
+        raise MediaProbeError(f"媒体路径不是普通文件：{resolved_path}")
 
     command = [
         ffprobe_executable,
@@ -89,26 +88,24 @@ def probe_media(path: str | Path, *, ffprobe_executable: str = "ffprobe") -> Med
             errors="replace",
         )
     except FileNotFoundError as exc:
-        raise ExecutableNotFoundError(
-            f"FFprobe executable was not found: {ffprobe_executable}"
-        ) from exc
+        raise ExecutableNotFoundError(f"未找到 FFprobe 可执行文件：{ffprobe_executable}") from exc
     except subprocess.CalledProcessError as exc:
-        detail = exc.stderr.strip() or "FFprobe returned a non-zero exit code"
-        raise MediaProbeError(f"Unable to probe media: {detail}") from exc
+        detail = exc.stderr.strip() or "FFprobe 返回了非零退出码"
+        raise MediaProbeError(f"无法读取媒体信息：{detail}") from exc
 
     try:
         payload = json.loads(result.stdout)
     except json.JSONDecodeError as exc:
-        raise MediaProbeError("FFprobe returned invalid JSON") from exc
+        raise MediaProbeError("FFprobe 返回了无效 JSON") from exc
 
     return build_media_info(payload, resolved_path)
 
 
 def build_media_info(payload: object, path: Path) -> MediaInfo:
-    """Build domain metadata from an FFprobe JSON payload."""
+    """从 FFprobe JSON 数据构建领域元数据。"""
 
     if not isinstance(payload, dict):
-        raise MediaProbeError("FFprobe payload must be a JSON object")
+        raise MediaProbeError("FFprobe 数据必须是 JSON 对象")
 
     format_data = payload.get("format")
     streams_data = payload.get("streams")

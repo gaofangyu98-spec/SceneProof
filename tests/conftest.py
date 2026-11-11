@@ -1,4 +1,4 @@
-"""Shared pytest fixtures."""
+"""pytest 共用测试夹具。"""
 
 from __future__ import annotations
 
@@ -11,11 +11,11 @@ import pytest
 
 @pytest.fixture
 def sample_video(tmp_path: Path) -> Path:
-    """Generate a short deterministic video when FFmpeg is available."""
+    """在 FFmpeg 可用时生成一个可重复的短视频。"""
 
     ffmpeg = shutil.which("ffmpeg")
     if ffmpeg is None:
-        pytest.skip("FFmpeg is required for media integration tests")
+        pytest.skip("媒体集成测试需要 FFmpeg")
 
     output = tmp_path / "sample.mp4"
     subprocess.run(

@@ -1,4 +1,4 @@
-"""Tests for media probing and CLI output."""
+"""媒体探测和命令行输出测试。"""
 
 from __future__ import annotations
 
@@ -58,7 +58,7 @@ def test_build_media_info_parses_ffprobe_payload() -> None:
 def test_probe_media_rejects_missing_file(tmp_path: Path) -> None:
     missing = tmp_path / "missing.mp4"
 
-    with pytest.raises(MediaProbeError, match="does not exist"):
+    with pytest.raises(MediaProbeError, match="媒体文件不存在"):
         probe_media(missing)
 
 
@@ -97,4 +97,4 @@ def test_cli_returns_error_for_missing_file(
     exit_code = main(["probe", str(tmp_path / "missing.mp4")])
 
     assert exit_code == 2
-    assert "does not exist" in capsys.readouterr().err
+    assert "媒体文件不存在" in capsys.readouterr().err
