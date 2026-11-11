@@ -25,6 +25,7 @@ from sceneproof.providers.base import ProviderError
 class RecordingProvider:
     """测试用提供器，写入一个可校验的文本产物。"""
 
+    # 作用：执行成功生成；处理：写入脚本文本产物并返回提供器记录。
     def generate(
         self,
         manifest: GenerationManifest,
@@ -42,6 +43,7 @@ class RecordingProvider:
 class FailingProvider:
     """测试用失败提供器。"""
 
+    # 作用：模拟生成失败；处理：写入部分产物后抛出提供器异常。
     def generate(
         self,
         manifest: GenerationManifest,
@@ -51,6 +53,7 @@ class FailingProvider:
         raise ProviderError("模拟提供器失败")
 
 
+# 作用：构造运行记录测试数据；处理：返回包含完整清单字段的字典。
 def manifest_payload() -> dict[str, object]:
     return {
         "case_id": "ledger-test",
@@ -70,10 +73,12 @@ def manifest_payload() -> dict[str, object]:
     }
 
 
+# 作用：创建清单对象；处理：使用测试字典生成强类型生成清单。
 def build_manifest() -> GenerationManifest:
     return GenerationManifest.model_validate(manifest_payload())
 
 
+# 作用：验证完整运行记录；处理：使用固定时钟执行并提供器，再检查目录、哈希和耗时。
 def test_execute_run_writes_manifest_run_record_and_artifact(tmp_path: Path) -> None:
     started_at = datetime(2026, 11, 10, 10, 0, tzinfo=UTC)
     times = iter((started_at, started_at + timedelta(seconds=1.25)))
@@ -104,6 +109,7 @@ def test_execute_run_writes_manifest_run_record_and_artifact(tmp_path: Path) -> 
     assert manifest_payload_saved["case_id"] == "ledger-test"
 
 
+# 作用：验证运行编号唯一性；处理：重复创建同一编号并检查运行记录错误。
 def test_execute_run_rejects_duplicate_run_id(tmp_path: Path) -> None:
     manifest = build_manifest()
     output_root = tmp_path / "runs"
@@ -113,6 +119,7 @@ def test_execute_run_rejects_duplicate_run_id(tmp_path: Path) -> None:
         execute_run(manifest, output_root, RecordingProvider(), run_id="duplicate")
 
 
+# 作用：验证失败证据保存；处理：使用失败提供器并检查错误状态和部分产物。
 def test_execute_run_persists_failed_provider_result(tmp_path: Path) -> None:
     outcome = execute_run(
         build_manifest(),
@@ -126,6 +133,7 @@ def test_execute_run_persists_failed_provider_result(tmp_path: Path) -> None:
     assert [artifact.path for artifact in outcome.record.artifacts] == ["partial.txt"]
 
 
+# 作用：验证清单 JSON 校验；处理：读取非法 JSON 并检查中文清单错误。
 def test_load_manifest_rejects_invalid_json(tmp_path: Path) -> None:
     manifest_path = tmp_path / "manifest.json"
     manifest_path.write_text("{invalid", encoding="utf-8")
@@ -134,6 +142,7 @@ def test_load_manifest_rejects_invalid_json(tmp_path: Path) -> None:
         load_manifest(manifest_path)
 
 
+# 作用：验证完整 Mock 生成链；处理：执行命令行任务并检查视频、音频和记录产物。
 @pytest.mark.skipif(
     shutil.which("ffmpeg") is None or shutil.which("ffprobe") is None,
     reason="需要 FFmpeg 和 ffprobe",
@@ -196,6 +205,7 @@ def test_cli_run_with_mock_provider_creates_valid_video(
     assert len(media_info.audio_streams) == 1
 
 
+# 作用：验证缺失清单处理；处理：执行 run 命令并检查中文错误和退出码。
 def test_cli_run_reports_missing_manifest(
     tmp_path: Path,
     capsys: pytest.CaptureFixture[str],

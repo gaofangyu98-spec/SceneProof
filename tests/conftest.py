@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 
+# 作用：提供测试视频夹具；处理：调用 FFmpeg 生成可重复使用的短视频文件。
 @pytest.fixture
 def sample_video(tmp_path: Path) -> Path:
     """在 FFmpeg 可用时生成一个可重复的短视频。"""
