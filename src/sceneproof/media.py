@@ -78,6 +78,7 @@ def probe_media(path: str | Path, *, ffprobe_executable: str = "ffprobe") -> Med
         str(resolved_path),
     ]
 
+    # 使用参数列表调用 FFprobe，不能把用户路径拼进 shell 命令。
     try:
         result = subprocess.run(
             command,
@@ -119,6 +120,7 @@ def build_media_info(payload: object, path: Path) -> MediaInfo:
     video_streams: list[VideoStream] = []
     audio_streams: list[AudioStream] = []
 
+    # FFprobe 可能返回字幕、数据等流，这里只保留当前阶段需要的视频和音频。
     for raw_stream in streams_data:
         if not isinstance(raw_stream, dict):
             continue

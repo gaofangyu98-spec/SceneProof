@@ -69,6 +69,7 @@ def execute_run(
     now = clock or _utc_now
     started_at = _ensure_utc(now())
     resolved_run_id = run_id or _new_run_id(started_at)
+    # 用例编号和运行编号会参与目录拼接，因此必须先限制格式。
     if re.fullmatch(RUN_ID_PATTERN, resolved_run_id) is None:
         raise RunLedgerError(f"运行编号格式不合法：{resolved_run_id}")
 
@@ -79,6 +80,7 @@ def execute_run(
 
     try:
         artifact_dir = run_dir / "artifacts"
+        # 已存在的运行目录不能复用，避免覆盖历史证据。
         artifact_dir.mkdir(parents=True, exist_ok=False)
     except FileExistsError as exc:
         raise RunLedgerError(f"运行目录已经存在：{run_dir}") from exc
@@ -88,6 +90,7 @@ def execute_run(
         manifest.model_dump(mode="json"),
     )
 
+    # 即使提供器失败，也要保留输入快照、错误和已经产生的部分产物。
     status = RunStatus.COMPLETED
     error: str | None = None
     provider_record = _provider_record_from_manifest(manifest)
@@ -99,6 +102,7 @@ def execute_run(
         error = str(exc)
 
     finished_at = _ensure_utc(now())
+    # 以磁盘上的实际文件为准生成产物记录，不相信提供器自行上报的列表。
     artifacts = _collect_artifacts(artifact_dir)
     record = RunRecord(
         run_id=resolved_run_id,
@@ -146,6 +150,7 @@ def _sha256(path: Path) -> str:
 def _write_json_atomic(path: Path, payload: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary_path = path.with_name(f".{path.name}.tmp")
+    # 先写临时文件再替换，避免进程中断后留下不完整的 JSON。
     temporary_path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",

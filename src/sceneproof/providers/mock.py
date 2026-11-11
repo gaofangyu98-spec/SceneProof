@@ -30,6 +30,7 @@ class MockVideoProvider:
         artifact_dir.mkdir(parents=True, exist_ok=True)
         width, height = _resolve_dimensions(manifest.aspect_ratio)
         video_path = artifact_dir / "final.mp4"
+        # Mock 视频只保证可播放，并使用无声音频源创建真实音频流。
         command = [
             ffmpeg,
             "-hide_banner",
@@ -60,6 +61,7 @@ class MockVideoProvider:
             str(video_path),
         ]
         result = subprocess.run(
+            # 参数列表方式不会经过 shell，路径中的空格不会被重新解释。
             command,
             check=False,
             capture_output=True,
@@ -72,6 +74,7 @@ class MockVideoProvider:
             raise ProviderError(f"Mock 视频生成失败：{detail}")
 
         scene_plan = artifact_dir / "scene-plan.json"
+        # 将场景时长写成结构化证据，供后续校验器读取。
         scene_plan.write_text(
             json.dumps(
                 _build_scene_plan(manifest),
