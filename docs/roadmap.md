@@ -1,44 +1,44 @@
-# Roadmap
+# 开发路线图
 
-## Milestone 0: Foundation
+## 阶段 0：基础工程
 
-- [x] Repository, packaging, linting, typing, tests, and CI
-- [x] Real FFprobe integration
-- [x] CLI JSON and human-readable output
+- [x] 仓库、打包、代码检查、类型检查、测试和持续集成
+- [x] 接入真实 FFprobe
+- [x] 命令行 JSON 和中文可读输出
 
-## Milestone 1: Reproducible run ledger
+## 阶段 1：可复现运行记录
 
-- [x] Generation case manifest
-- [x] Run and artifact records
-- [x] Mock provider
-- [x] Local artifact storage
-- [ ] Add validator integration to the run pipeline
+- [x] 生成用例清单
+- [x] 运行和产物记录
+- [x] Mock 提供器
+- [x] 本地产物存储
+- [ ] 将校验器接入运行流程
 
-## Milestone 2: Deterministic verification
+## 阶段 2：确定性校验
 
-- [ ] Container and stream checks
-- [ ] Missing audio and invalid duration checks
-- [ ] Black-frame, freeze, and silence detection
-- [ ] Structured evidence and failure categories
+- [ ] 容器和媒体流检查
+- [ ] 缺失音频和时长错误检查
+- [ ] 黑帧、冻结帧和静音检测
+- [ ] 结构化证据和失败分类
 
-## Milestone 3: Quality evaluation
+## 阶段 3：质量评估
 
-- Keyframe and transcript extraction
-- Rubric-based multimodal evaluation
-- Evidence citations
-- Human review and judge calibration
+- 关键帧和字幕提取
+- 基于评分量表的多模态评估
+- 证据引用
+- 人工复核和评审模型校准
 
-## Milestone 4: Regression reporting
+## 阶段 4：回归报告
 
-- Baseline and candidate comparison
-- Failure clustering
-- Markdown and HTML reports
-- CI quality gate
+- 基线版本和候选版本对比
+- 失败聚类
+- Markdown 和 HTML 报告
+- 持续集成质量门禁
 
-## Milestone 5: Usable product
+## 阶段 5：可用产品
 
-- Minimal web interface
-- Synthetic demo project
-- Security review
-- Public portfolio documentation
+- 最小 Web 界面
+- 合成演示项目
+- 安全检查
+- 公开作品集文档
 

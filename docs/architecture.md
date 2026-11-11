@@ -1,42 +1,41 @@
-# Architecture
+# 架构说明
 
-## Scope
+## 当前范围
 
-SceneProof evaluates AI video production runs from evidence rather than from a single task-status
-field. The current vertical slice is intentionally narrow:
+SceneProof 依据运行证据评估 AI 视频生产任务，而不是只检查一个任务状态字段。当前纵向切片刻意保持较小：
 
-1. Load and validate a generation manifest.
-2. Create an immutable run directory.
-3. Execute a provider-neutral generation adapter.
-4. Save the manifest snapshot and artifact hashes.
-5. Inspect media files through `ffprobe`.
-6. Render a concise terminal summary or JSON.
+1. 加载并校验生成清单。
+2. 创建不可变运行目录。
+3. 执行与平台无关的生成适配器。
+4. 保存清单快照和产物哈希。
+5. 通过 `ffprobe` 检查媒体文件。
+6. 输出简洁的终端结果或 JSON。
 
-## Boundaries
+## 模块边界
 
-- `sceneproof.media` owns FFmpeg executable interaction and media metadata parsing.
-- `sceneproof.models` owns manifest and run-record contracts.
-- `sceneproof.ledger` owns run directory creation and artifact hashing.
-- `sceneproof.providers` owns platform-specific generation behavior.
-- `sceneproof.cli` owns command-line input and output. It does not parse FFprobe payloads.
-- Future platform adapters will own vendor-specific HTTP behavior.
-- Future validators will consume domain objects instead of raw FFprobe dictionaries.
+- `sceneproof.media` 负责 FFmpeg 可执行文件调用和媒体元数据解析。
+- `sceneproof.models` 负责生成清单和运行记录的数据契约。
+- `sceneproof.ledger` 负责创建运行目录、收集产物和计算哈希。
+- `sceneproof.providers` 负责具体平台的生成行为。
+- `sceneproof.cli` 负责命令行输入和输出，不直接解析 FFprobe 原始数据。
+- 后续平台适配器负责各平台特有的 HTTP 行为。
+- 后续校验器消费领域对象，不直接依赖原始 FFprobe 字典。
 
-## Design constraints
+## 设计约束
 
-- All subprocess calls use argument lists and never a shell.
-- Media paths are resolved before probing and must reference regular files.
-- External command failures become a single project-specific error type at the boundary.
-- Run identifiers and case identifiers are restricted before they are used as path components.
-- Provider failures still produce a failed run record with partial artifacts and evidence.
-- Artifact paths, file sizes, MIME types, and SHA-256 hashes are persisted.
-- JSON output is designed for CI and downstream report generation.
-- Deterministic validators are added before AI-based quality evaluation.
+- 所有子进程调用都使用参数列表，不经过 shell。
+- 媒体路径必须先解析，并且只能指向普通文件。
+- 外部命令错误在模块边界统一转换为项目定义的异常。
+- 用例编号和运行编号在拼接路径前必须经过格式限制。
+- 提供器失败时仍然生成失败运行记录，并保留部分产物和证据。
+- 保存产物路径、文件大小、MIME 类型和 SHA-256 哈希。
+- JSON 输出用于持续集成和后续报告生成。
+- 先实现确定性校验，再增加 AI 质量评估。
 
-## Next slices
+## 后续切片
 
-1. Add a deterministic validator pipeline over the run artifacts.
-2. Add version comparison and HTML/Markdown reports.
-3. Add an HTTP adapter for authorized platform APIs.
-4. Add multimodal evaluation with evidence citations and human review.
+1. 在运行产物上增加确定性校验流水线。
+2. 增加版本对比、Markdown 报告和 HTML 报告。
+3. 增加面向已授权平台 API 的 HTTP 适配器。
+4. 增加带证据引用的多模态评估和人工复核。
 
