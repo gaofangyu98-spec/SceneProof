@@ -60,6 +60,15 @@ class ArtifactRecord(StrictModel):
     sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
+class ValidationRecord(StrictModel):
+    """一条与具体产物关联的校验证据。"""
+
+    artifact_path: str = Field(min_length=1, max_length=1024)
+    code: str = Field(pattern=r"^[a-z][a-z0-9_]{0,63}$")
+    passed: bool
+    message: str = Field(min_length=1, max_length=1000)
+
+
 class ProviderRecord(StrictModel):
     """提供器在本次运行中实际报告的信息。"""
 
@@ -82,4 +91,5 @@ class RunRecord(StrictModel):
     manifest: GenerationManifest
     provider: ProviderRecord
     artifacts: tuple[ArtifactRecord, ...] = ()
+    validations: tuple[ValidationRecord, ...] = ()
     error: str | None = None
