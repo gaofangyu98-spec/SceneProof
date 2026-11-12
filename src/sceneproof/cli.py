@@ -162,6 +162,11 @@ def _print_run_summary(outcome: RunOutcome) -> None:
     for artifact in record.artifacts:
         print(f"  - {artifact.path} ({artifact.size_bytes} 字节)")
 
+    print(f"校验数量：{len(record.validations)}")
+    for validation in record.validations:
+        result_text = "通过" if validation.passed else "失败"
+        print(f"  - {validation.artifact_path} [{result_text}] {validation.message}")
+
 
 # 作用：格式化分辨率；处理：合法宽高转换为“宽x高”，缺失值返回“未知”。
 def _format_dimensions(width: int | None, height: int | None) -> str:

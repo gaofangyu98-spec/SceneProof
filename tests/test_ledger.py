@@ -99,6 +99,7 @@ def test_execute_run_writes_manifest_run_record_and_artifact(tmp_path: Path) -> 
     artifact = outcome.record.artifacts[0]
     assert artifact.path == "result.txt"
     assert artifact.sha256 == hashlib.sha256("测试脚本".encode()).hexdigest()
+    assert outcome.record.validations == ()
 
     run_payload = json.loads((outcome.directory / "run.json").read_text(encoding="utf-8"))
     manifest_payload_saved = json.loads(
@@ -196,6 +197,14 @@ def test_cli_run_with_mock_provider_creates_valid_video(
         "final.mp4",
         "scene-plan.json",
     }
+    assert record["validations"] == [
+        {
+            "artifact_path": "final.mp4",
+            "code": "audio_present",
+            "passed": True,
+            "message": "检测到音频流，校验通过。",
+        }
+    ]
 
     video_path = output_root / "mock-video" / "cli-run" / "artifacts" / "final.mp4"
     media_info = probe_media(video_path)

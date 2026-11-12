@@ -14,6 +14,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 
+from sceneproof.media import MediaProbeError, probe_media
 from sceneproof.models import (
     RUN_ID_PATTERN,
     ArtifactRecord,
@@ -21,8 +22,10 @@ from sceneproof.models import (
     ProviderRecord,
     RunRecord,
     RunStatus,
+    ValidationRecord,
 )
 from sceneproof.providers.base import ProviderError, VideoProvider
+from sceneproof.validators import ValidationResult, validate_required_audio
 
 
 class ManifestError(RuntimeError):
@@ -103,9 +106,11 @@ def execute_run(
         status = RunStatus.FAILED
         error = str(exc)
 
-    finished_at = _ensure_utc(now())
-    # 以磁盘上的实际文件为准生成产物记录，不相信提供器自行上报的列表。
+    # 以磁盘上的实际文件为准生成产物记录。
     artifacts = _collect_artifacts(artifact_dir)
+    validations = _collect_validations(artifact_dir, artifacts)
+    finished_at = _ensure_utc(now())
+
     record = RunRecord(
         run_id=resolved_run_id,
         case_id=manifest.case_id,
@@ -116,10 +121,45 @@ def execute_run(
         manifest=manifest,
         provider=provider_record,
         artifacts=artifacts,
+        validations=validations,
         error=error,
     )
     _write_json_atomic(run_dir / "run.json", record.model_dump(mode="json"))
     return RunOutcome(record=record, directory=run_dir)
+
+
+# 作用：收集视频产物的校验证据。
+# 处理：逐个探测视频并执行必需音频校验，读取失败也记录为失败证据。
+def _collect_validations(
+    artifact_dir: Path,
+    artifacts: tuple[ArtifactRecord, ...],
+) -> tuple[ValidationRecord, ...]:
+    validations: list[ValidationRecord] = []
+
+    for artifact in artifacts:
+        if not artifact.media_type.startswith("video/"):
+            continue
+
+        try:
+            media_info = probe_media(artifact_dir / artifact.path)
+            result = validate_required_audio(media_info)
+        except MediaProbeError as exc:
+            result = ValidationResult(
+                code="media_probe_failed",
+                passed=False,
+                message=f"无法读取媒体信息：{exc}",
+            )
+
+        validations.append(
+            ValidationRecord(
+                artifact_path=artifact.path,
+                code=result.code,
+                passed=result.passed,
+                message=result.message,
+            )
+        )
+
+    return tuple(validations)
 
 
 # 作用：收集生成产物；处理：扫描实际文件并计算路径、类型、大小和哈希。
