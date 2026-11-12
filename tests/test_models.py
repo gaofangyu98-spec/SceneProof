@@ -34,6 +34,7 @@ def test_generation_manifest_accepts_valid_payload() -> None:
 
     assert manifest.case_id == "three-scene-demo"
     assert manifest.scene_count == 2
+    assert manifest.duration_tolerance_seconds == 0.25
     assert manifest.provider.seed == 42
 
 
@@ -61,6 +62,15 @@ def test_generation_manifest_rejects_invalid_case_id() -> None:
     payload["case_id"] = "../escape"
 
     with pytest.raises(ValidationError, match="case_id"):
+        GenerationManifest.model_validate(payload)
+
+
+# 作用：验证时长容差约束；处理：使用负数容差并检查数据模型拒绝输入。
+def test_generation_manifest_rejects_negative_duration_tolerance() -> None:
+    payload = valid_manifest_payload()
+    payload["duration_tolerance_seconds"] = -0.1
+
+    with pytest.raises(ValidationError, match="duration_tolerance_seconds"):
         GenerationManifest.model_validate(payload)
 
 

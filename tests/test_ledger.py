@@ -197,7 +197,8 @@ def test_cli_run_with_mock_provider_creates_valid_video(
         "final.mp4",
         "scene-plan.json",
     }
-    assert record["validations"] == [
+    assert len(record["validations"]) == 3
+    assert record["validations"][:2] == [
         {
             "artifact_path": "final.mp4",
             "code": "video_present",
@@ -211,6 +212,11 @@ def test_cli_run_with_mock_provider_creates_valid_video(
             "message": "检测到音频流，校验通过。",
         },
     ]
+    duration_validation = record["validations"][2]
+    assert duration_validation["artifact_path"] == "final.mp4"
+    assert duration_validation["code"] == "duration_within_tolerance"
+    assert duration_validation["passed"] is True
+    assert "容差" in duration_validation["message"]
 
     video_path = output_root / "mock-video" / "cli-run" / "artifacts" / "final.mp4"
     media_info = probe_media(video_path)

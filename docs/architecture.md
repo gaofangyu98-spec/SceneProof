@@ -9,13 +9,15 @@ SceneProof 依据运行证据评估 AI 视频生产任务，而不是只检查�
 3. 执行与平台无关的生成适配器。
 4. 保存清单快照和产物哈希。
 5. 通过 `ffprobe` 检查媒体文件。
-6. 输出简洁的终端结果或 JSON。
+6. 执行视频流、音频流和时长等确定性规则。
+7. 保存结构化校验证据，并输出简洁的终端结果或 JSON。
 
 ## 模块边界
 
 - `sceneproof.media` 负责 FFmpeg 可执行文件调用和媒体元数据解析。
 - `sceneproof.models` 负责生成清单和运行记录的数据契约。
 - `sceneproof.ledger` 负责创建运行目录、收集产物和计算哈希。
+- `sceneproof.validators` 负责消费媒体领域对象并执行确定性质量规则。
 - `sceneproof.providers` 负责具体平台的生成行为。
 - `sceneproof.cli` 负责命令行输入和输出，不直接解析 FFprobe 原始数据。
 - 后续平台适配器负责各平台特有的 HTTP 行为。
