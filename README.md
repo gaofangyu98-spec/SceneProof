@@ -16,7 +16,7 @@ SceneProof 是面向 AI 视频生产链路的场景级质量验证与回归工�
 - 使用 Mock 提供器生成本地测试视频
 - 保存输入快照、提供器信息、运行状态、耗时和产物哈希
 - 通过 `ffprobe` 读取真实视频信息
-- 自动校验视频流、音频流和时长容差，并保存结构化证据
+- 自动校验容器、视频流、音频流和时长容差，并保存结构化证据
 
 ## 环境要求
 
@@ -74,7 +74,7 @@ uv run sceneproof run fixtures/cases/three_scene_demo.json --output-dir .data/ru
 
 `manifest.json` 是执行时的输入快照，`run.json` 包含状态、耗时、提供器信息、产物哈希和校验证据，`artifacts/` 保存本次生成产物。
 
-清单中的 `duration_tolerance_seconds` 控制允许的时长偏差，省略时默认为 `0.25` 秒。
+清单中的 `expected_container` 控制预期容器，省略时默认为 `mp4`；`duration_tolerance_seconds` 控制允许的时长偏差，省略时默认为 `0.25` 秒。
 
 ## 开发检查
 
