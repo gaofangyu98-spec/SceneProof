@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from sceneproof.models import GenerationManifest
+from sceneproof.models import GenerationManifest, ValidationRecord
 
 
 # 作用：构造合法清单数据；处理：返回包含完整提供器和媒体配置的测试字典。
@@ -62,3 +62,21 @@ def test_generation_manifest_rejects_invalid_case_id() -> None:
 
     with pytest.raises(ValidationError, match="case_id"):
         GenerationManifest.model_validate(payload)
+
+
+# 作用：验证校验证据结构；处理：构造一条音频校验记录，检查字段和 JSON 序列化结果。
+def test_validation_record_preserves_structured_evidence() -> None:
+    validation = ValidationRecord(
+        artifact_path="final.mp4",
+        code="audio_present",
+        passed=True,
+        message="检测到音频流，校验通过。",
+    )
+
+    assert validation.passed is True
+    assert validation.model_dump(mode="json") == {
+        "artifact_path": "final.mp4",
+        "code": "audio_present",
+        "passed": True,
+        "message": "检测到音频流，校验通过。",
+    }
