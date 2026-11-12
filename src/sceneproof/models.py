@@ -39,6 +39,10 @@ class GenerationManifest(StrictModel):
     script: str = Field(min_length=1)
     scene_count: int = Field(ge=1, le=100)
     aspect_ratio: str = Field(pattern=r"^[1-9][0-9]{0,3}:[1-9][0-9]{0,3}$")
+    expected_container: str = Field(
+        default="mp4",
+        pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+    )
     duration_seconds: float = Field(gt=0, le=3600)
     duration_tolerance_seconds: float = Field(default=0.25, ge=0, le=60)
     language: str = Field(default="zh-CN", pattern=r"^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$")

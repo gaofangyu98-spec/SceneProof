@@ -8,17 +8,22 @@ import pytest
 
 from sceneproof.media import AudioStream, MediaInfo, VideoStream
 from sceneproof.validators import (
+    validate_container,
     validate_duration,
     validate_required_audio,
     validate_required_video,
 )
 
 
-# 作用：构造带指定时长的媒体对象；处理：返回包含最小视频流和音频流的测试数据。
-def media_info_with_duration(duration_seconds: float | None) -> MediaInfo:
+# 作用：构造带指定时长和容器的媒体对象；处理：返回包含最小视频流和音频流的测试数据。
+def media_info_with_duration(
+    duration_seconds: float | None,
+    *,
+    format_name: str | None = "mp4",
+) -> MediaInfo:
     return MediaInfo(
         path=Path("sample.mp4"),
-        format_name="mp4",
+        format_name=format_name,
         duration_seconds=duration_seconds,
         size_bytes=1024,
         bit_rate=8192,
@@ -40,6 +45,51 @@ def media_info_with_duration(duration_seconds: float | None) -> MediaInfo:
             ),
         ),
     )
+
+
+# 作用：验证容器匹配时通过；处理：使用包含 mp4 别名的 FFprobe 值并检查通过结果。
+def test_validate_container_passes_for_matching_alias() -> None:
+    media_info = media_info_with_duration(
+        2.0,
+        format_name="mov,mp4,m4a,3gp,3g2,mj2",
+    )
+
+    result = validate_container(media_info, expected_container="mp4")
+
+    assert result.passed is True
+    assert result.code == "container_matched"
+    assert "mp4" in result.message
+
+
+# 作用：验证容器不匹配时失败；处理：使用 WebM 容器并要求 mp4 后检查失败状态码和说明。
+def test_validate_container_fails_for_mismatch() -> None:
+    media_info = media_info_with_duration(2.0, format_name="matroska,webm")
+
+    result = validate_container(media_info, expected_container="mp4")
+
+    assert result.passed is False
+    assert result.code == "container_mismatch"
+    assert "webm" in result.message
+
+
+# 作用：验证缺失容器信息时失败；处理：构造没有 format_name 的媒体信息并检查缺失状态码。
+def test_validate_container_fails_when_format_is_missing() -> None:
+    media_info = media_info_with_duration(2.0, format_name=None)
+
+    result = validate_container(media_info, expected_container="mp4")
+
+    assert result.passed is False
+    assert result.code == "container_missing"
+    assert "容器" in result.message
+
+
+# 作用：验证空预期容器被拒绝；处理：传入空白字符串并检查异常。
+def test_validate_container_rejects_empty_expected_container() -> None:
+    with pytest.raises(ValueError, match="预期容器"):
+        validate_container(
+            media_info_with_duration(2.0),
+            expected_container="  ",
+        )
 
 
 # 作用：验证有音频时校验通过；处理：构造带一条音频流的媒体信息，检查状态码和中文结果。

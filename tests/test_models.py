@@ -34,6 +34,7 @@ def test_generation_manifest_accepts_valid_payload() -> None:
 
     assert manifest.case_id == "three-scene-demo"
     assert manifest.scene_count == 2
+    assert manifest.expected_container == "mp4"
     assert manifest.duration_tolerance_seconds == 0.25
     assert manifest.provider.seed == 42
 
@@ -71,6 +72,15 @@ def test_generation_manifest_rejects_negative_duration_tolerance() -> None:
     payload["duration_tolerance_seconds"] = -0.1
 
     with pytest.raises(ValidationError, match="duration_tolerance_seconds"):
+        GenerationManifest.model_validate(payload)
+
+
+# 作用：验证容器字段约束；处理：使用包含路径字符的容器值并检查数据模型拒绝输入。
+def test_generation_manifest_rejects_invalid_expected_container() -> None:
+    payload = valid_manifest_payload()
+    payload["expected_container"] = "../mp4"
+
+    with pytest.raises(ValidationError, match="expected_container"):
         GenerationManifest.model_validate(payload)
 
 

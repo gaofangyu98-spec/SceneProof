@@ -16,6 +16,44 @@ class ValidationResult:
     message: str
 
 
+# 作用：检查媒体容器是否符合清单中的预期格式。
+# 处理：解析 FFprobe 的容器别名列表，匹配预期值并返回稳定状态码和中文说明。
+def validate_container(
+    media_info: MediaInfo,
+    *,
+    expected_container: str,
+) -> ValidationResult:
+    """校验媒体容器是否与预期格式一致。"""
+
+    expected = expected_container.strip().lower()
+    if not expected:
+        raise ValueError("预期容器不能为空")
+
+    format_names = {
+        item.strip().lower() for item in (media_info.format_name or "").split(",") if item.strip()
+    }
+    if not format_names:
+        return ValidationResult(
+            code="container_missing",
+            passed=False,
+            message="无法读取视频容器信息，无法完成容器校验。",
+        )
+
+    if expected in format_names:
+        return ValidationResult(
+            code="container_matched",
+            passed=True,
+            message=f"检测到预期容器 {expected}，校验通过。",
+        )
+
+    actual = "、".join(sorted(format_names))
+    return ValidationResult(
+        code="container_mismatch",
+        passed=False,
+        message=f"检测到容器 {actual}，与预期 {expected} 不一致。",
+    )
+
+
 # 作用：检查媒体是否至少包含一条音频流。
 # 处理：根据 audio_streams 是否存在返回通过或失败结果，不抛出异常。
 def validate_required_audio(media_info: MediaInfo) -> ValidationResult:

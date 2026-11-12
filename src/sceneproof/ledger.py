@@ -27,6 +27,7 @@ from sceneproof.models import (
 from sceneproof.providers.base import ProviderError, VideoProvider
 from sceneproof.validators import (
     ValidationResult,
+    validate_container,
     validate_duration,
     validate_required_audio,
     validate_required_video,
@@ -134,7 +135,7 @@ def execute_run(
 
 
 # 作用：收集视频产物的校验证据。
-# 处理：逐个探测视频并执行视频流、音频流和时长校验，读取失败也记录为失败证据。
+# 处理：逐个探测视频并执行容器、视频流、音频流和时长校验，读取失败也记录为失败证据。
 def _collect_validations(
     manifest: GenerationManifest,
     artifact_dir: Path,
@@ -149,6 +150,10 @@ def _collect_validations(
         try:
             media_info = probe_media(artifact_dir / artifact.path)
             results: tuple[ValidationResult, ...] = (
+                validate_container(
+                    media_info,
+                    expected_container=manifest.expected_container,
+                ),
                 validate_required_video(media_info),
                 validate_required_audio(media_info),
                 validate_duration(
