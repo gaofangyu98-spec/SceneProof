@@ -25,7 +25,11 @@ from sceneproof.models import (
     ValidationRecord,
 )
 from sceneproof.providers.base import ProviderError, VideoProvider
-from sceneproof.validators import ValidationResult, validate_required_audio
+from sceneproof.validators import (
+    ValidationResult,
+    validate_required_audio,
+    validate_required_video,
+)
 
 
 class ManifestError(RuntimeError):
@@ -129,7 +133,7 @@ def execute_run(
 
 
 # 作用：收集视频产物的校验证据。
-# 处理：逐个探测视频并执行必需音频校验，读取失败也记录为失败证据。
+# 处理：逐个探测视频并执行必需视频流和音频流校验，读取失败也记录为失败证据。
 def _collect_validations(
     artifact_dir: Path,
     artifacts: tuple[ArtifactRecord, ...],
@@ -142,22 +146,28 @@ def _collect_validations(
 
         try:
             media_info = probe_media(artifact_dir / artifact.path)
-            result = validate_required_audio(media_info)
+            results: tuple[ValidationResult, ...] = (
+                validate_required_video(media_info),
+                validate_required_audio(media_info),
+            )
         except MediaProbeError as exc:
-            result = ValidationResult(
-                code="media_probe_failed",
-                passed=False,
-                message=f"无法读取媒体信息：{exc}",
+            results = (
+                ValidationResult(
+                    code="media_probe_failed",
+                    passed=False,
+                    message=f"无法读取媒体信息：{exc}",
+                ),
             )
 
-        validations.append(
-            ValidationRecord(
-                artifact_path=artifact.path,
-                code=result.code,
-                passed=result.passed,
-                message=result.message,
+        for result in results:
+            validations.append(
+                ValidationRecord(
+                    artifact_path=artifact.path,
+                    code=result.code,
+                    passed=result.passed,
+                    message=result.message,
+                )
             )
-        )
 
     return tuple(validations)
 

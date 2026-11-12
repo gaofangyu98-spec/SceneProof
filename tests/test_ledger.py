@@ -200,10 +200,16 @@ def test_cli_run_with_mock_provider_creates_valid_video(
     assert record["validations"] == [
         {
             "artifact_path": "final.mp4",
+            "code": "video_present",
+            "passed": True,
+            "message": "检测到视频流，校验通过。",
+        },
+        {
+            "artifact_path": "final.mp4",
             "code": "audio_present",
             "passed": True,
             "message": "检测到音频流，校验通过。",
-        }
+        },
     ]
 
     video_path = output_root / "mock-video" / "cli-run" / "artifacts" / "final.mp4"
